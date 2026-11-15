@@ -1,0 +1,84 @@
+name: Apple build checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: apple-build-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  apple-build:
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+          xcodebuild -showsdks
+      - name: Validate generated project and assets
+        run: python3 Scripts/validate_project.py
+      - name: Test scoring and document synchronization logic
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p build/logs build/results
+          swift test 2>&1 | tee build/logs/swift-tests.log
+      - name: Build iPhone Simulator app and embedded watch app
+        id: iphone_build
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p build/logs build/results
+          xcodebuild -project CourtCall.xcodeproj \
+            -scheme CourtCall \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build/iPhone \
+            -resultBundlePath build/results/iPhone.xcresult \
+            CODE_SIGNING_ALLOWED=NO \
+            build 2>&1 | tee build/logs/iphone-build.log
+      - name: Build Apple Watch Simulator app
+        id: watch_build
+        if: ${{ always() && !cancelled() }}
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p build/logs build/results
+          xcodebuild -project CourtCall.xcodeproj \
+            -scheme CourtCallWatch \
+            -destination 'generic/platform=watchOS Simulator' \
+            -derivedDataPath build/Watch \
+            -resultBundlePath build/results/Watch.xcresult \
+            CODE_SIGNING_ALLOWED=NO \
+            build 2>&1 | tee build/logs/watch-build.log
+      - name: Package available simulator apps
+        if: ${{ always() && !cancelled() }}
+        shell: bash
+        run: |
+          mkdir -p build/artifacts
+          if [ "${{ steps.iphone_build.outcome }}" = success ] && [ -d build/iPhone/Build/Products/Debug-iphonesimulator/CourtCall.app ]; then
+            tar -czf build/artifacts/CourtCall-iPhone-Simulator.tar.gz \
+              -C build/iPhone/Build/Products/Debug-iphonesimulator CourtCall.app
+          fi
+          if [ "${{ steps.watch_build.outcome }}" = success ] && [ -d build/Watch/Build/Products/Debug-watchsimulator/CourtCallWatch.app ]; then
+            tar -czf build/artifacts/CourtCall-Apple-Watch-Simulator.tar.gz \
+              -C build/Watch/Build/Products/Debug-watchsimulator CourtCallWatch.app
+          fi
+      - name: Save build logs, results and simulator apps
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: CourtCall-Apple-build-${{ github.run_number }}
+          retention-days: 7
+          if-no-files-found: warn
+          path: |
+            build/logs/
+            build/results/
+            build/artifacts/
