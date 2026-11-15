@@ -4,9 +4,9 @@
 
 项目最低支持 iOS 17 / watchOS 10。没有服务器、订阅或第三方运行时依赖；比赛先保存在各自设备，连接恢复后合并逐分记录。
 
-当前交付是 Xcode 源码项目。制作环境为 Linux，Apple SDK 构建、手表音频和配对设备同步仍需在 Mac / 真机完成验证。检查范围与步骤见 [Docs/TESTING.md](Docs/TESTING.md)。
+当前交付是 Xcode 源码项目。Apple SDK 的 iPhone / Watch 模拟器构建已在 GitHub 的 Mac 环境通过；手表音频、Siri 和配对设备同步仍需真机验证。检查范围与步骤见 [Docs/TESTING.md](Docs/TESTING.md)。
 
-已通过 38 项 Swift 测试，并检查了所有 Swift 文件的语法、Xcode 工程与两端资源配置。
+同一组 38 项 Swift 测试已在 Linux 和 Mac 均通过，并检查了所有 Swift 文件的语法、Xcode 工程与两端资源配置。[Mac 构建与测试结果](https://github.com/Johnnye01/TennisScore/actions/runs/43754005439)
 
 ## 第一次装到自己的设备
 
@@ -109,4 +109,4 @@ python3 Scripts/generate_project.py
 | `Tests` | 规则与事件合并测试 |
 | `Scripts` | 项目生成、结构校验和签名标识配置 |
 
-仓库还附带 macOS GitHub Actions 构建配置；把项目放进自己的仓库后可执行未签名模拟器构建。此交付没有上传或发布到外部仓库。
+仓库附带 macOS GitHub Actions 构建配置。项目已保存到指定的 TennisScore 仓库，并已通过未签名模拟器构建。检查会保存日志、结果和成功构建的模拟器 App；模拟器包不能直接安装到 iPhone 或 Apple Watch 真机，真机仍按前面的步骤选择个人 Team 签名安装。

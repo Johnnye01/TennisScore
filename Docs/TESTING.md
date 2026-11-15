@@ -2,7 +2,11 @@
 
 当前制作环境是 Linux。纯 Swift 规则 / 事件文档测试与项目结构检查可以在这里执行；SwiftUI、WatchConnectivity、App Intents 和手表音频需要 Apple SDK 或配对真机，不能用 Linux 语法检查代替。
 
-本次已实际完成：Swift 6.0.3 编译并通过 **38 项 XCTest**（31 项规则、7 项事件文档）；全部 Swift 文件语法解析通过；项目结构校验通过；Apple 的 `plutil` 工具检查 `.pbxproj` 与两端 `Info.plist` 通过。尚未运行 Apple SDK 的完整编译、模拟器或配对真机测试。
+本次已实际完成：Linux Swift 6.0.3 编译并通过 **38 项 XCTest**（31 项规则、7 项事件文档）；全部 Swift 文件语法解析通过；项目结构校验通过；Apple 的 `plutil` 工具检查 `.pbxproj` 与两端 `Info.plist` 通过。
+
+随后在指定 GitHub 仓库的 Mac CI 中，用 **Xcode 26.6 / Apple Swift 6.3.3** 验证通过：同一组 38 项测试、iPhone Simulator App 及嵌入手表 App 构建、独立 Watch Simulator App 构建。验证源码提交为 `c8eda15092133ffc46952f16e3be47dd5b676d99`。[完整运行记录](https://github.com/Johnnye01/TennisScore/actions/runs/43754005439)
+
+尚未完成配对真机联调或模拟器内的界面交互测试；编译通过不代表 Siri、扬声器、连接和抬腕体验已验证。
 
 ## 自动检查
 
@@ -31,7 +35,7 @@ xcodebuild -project CourtCall.xcodeproj -scheme CourtCallWatch \
 
 不要给整个 iPhone + Watch 依赖图强行传 `-sdk iphonesimulator`：两个目标各自选择适合的平台 SDK。
 
-`.github/workflows/apple-build.yml` 提供相同的 macOS CI 路径，并保存构建日志、`.xcresult` 与成功产出的模拟器 App 压缩包，默认保留 7 天。模拟器包不能直接安装到真实 iPhone / Apple Watch；真机仍须用自己的账号签名。构建是否通过以对应 GitHub Actions 运行结果为准。
+`.github/workflows/apple-build.yml` 提供相同的 macOS CI 路径，已成功执行。日志、`.xcresult` 和成功的模拟器 App 压缩包作为运行产物保留 7 天；产物不能代替真机签名安装。
 
 ## 第一次真机联调
 
