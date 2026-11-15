@@ -1,0 +1,3 @@
+// Configure with Scripts/configure_signing.py, or select your Team in Xcode.
+COURTCALL_BUNDLE_PREFIX = com.courtcall.personal
+DEVELOPMENT_TEAM =
